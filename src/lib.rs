@@ -7,4 +7,4 @@ pub use downloader::download_feed;
 pub use parser::parse_feed;
 
 /// Result type alias for unreel operations
-pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+pub type Result<T> = anyhow::Result<T>;

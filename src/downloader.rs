@@ -1,5 +1,7 @@
 //! Feed downloading functionality
 
+use anyhow::Context;
+
 use crate::Result;
 
 /// Downloads a podcast feed from the given URL
@@ -19,9 +21,9 @@ use crate::Result;
 /// Returns an error if the request fails or the response cannot be read
 pub async fn download_feed(url: &str) -> Result<String>
 {
-    // For now, use reqwest to download the feed
-    // We'll need to add reqwest as a dependency
-    let response = reqwest::get(url).await?;
-    let content = response.text().await?;
+    let response = reqwest::get(url).await.context(format!("Failed to download feed from {}", url))?;
+
+    let content = response.text().await.context("Failed to read response body")?;
+
     Ok(content)
 }

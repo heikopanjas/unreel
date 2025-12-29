@@ -1,5 +1,7 @@
 //! RSS/XML feed parsing functionality
 
+use anyhow::{Context, bail};
+use jiff::{Zoned, fmt::rfc2822};
 use quick_xml::{Reader, events::Event};
 
 use crate::Result;
@@ -21,7 +23,7 @@ pub struct PodcastItem
     pub title:       Option<String>,
     pub description: Option<String>,
     pub enclosure:   Option<Enclosure>,
-    pub pub_date:    Option<String>,
+    pub pub_date:    Option<Zoned>,
     pub guid:        Option<String>
 }
 
@@ -103,7 +105,7 @@ pub fn parse_feed(xml_content: &str) -> Result<PodcastFeed>
             }
             | Ok(Event::Text(e)) =>
             {
-                let text = reader.decoder().decode(&e)?.to_string();
+                let text = reader.decoder().decode(&e).context("Failed to decode XML text")?.to_string();
 
                 if current_item.is_some() == true
                 {
@@ -113,7 +115,14 @@ pub fn parse_feed(xml_content: &str) -> Result<PodcastFeed>
                         {
                             | "title" => item.title = Some(text),
                             | "description" => item.description = Some(text),
-                            | "pubDate" => item.pub_date = Some(text),
+                            | "pubDate" =>
+                            {
+                                // Parse RFC 2822 date format (standard for RSS)
+                                if let Ok(timestamp) = rfc2822::parse(&text)
+                                {
+                                    item.pub_date = Some(timestamp);
+                                }
+                            }
                             | "guid" => item.guid = Some(text),
                             | _ =>
                             {}
@@ -143,7 +152,7 @@ pub fn parse_feed(xml_content: &str) -> Result<PodcastFeed>
                 }
             }
             | Ok(Event::Eof) => break,
-            | Err(e) => return Err(format!("Error parsing XML at position {}: {}", reader.buffer_position(), e).into()),
+            | Err(e) => bail!("Error parsing XML at position {}: {}", reader.buffer_position(), e),
             | _ =>
             {}
         }

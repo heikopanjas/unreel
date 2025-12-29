@@ -731,6 +731,21 @@ fix: update `KString` with "nested 'quotes'" & $special chars!
   - User restored original comprehensive .rustfmt.toml configuration (80 lines with detailed formatting rules)
 - Reasoning: Use nightly toolchain for access to latest Rust features and improvements
 
+- Added anyhow for improved error handling:
+  - Added `anyhow` v1.0.100 dependency
+  - Updated Result type alias to use anyhow::Result
+  - Added error context to downloader and parser modules
+  - Use anyhow::bail! for better error messages
+- Reasoning: anyhow provides better error messages with context and is the standard error handling library in Rust CLI applications
+
+- Added jiff for date/time handling:
+  - Added `jiff` v0.2.17 dependency
+  - Updated PodcastItem pub_date field to use jiff::Zoned instead of String
+  - Parse RSS pubDate fields using RFC 2822 format parser
+  - Display dates in local timezone with human-readable format
+  - Format: "Month DD, YYYY at HH:MM AM/PM"
+- Reasoning: jiff is a modern, comprehensive datetime library for Rust that handles timezones correctly and provides excellent parsing/formatting capabilities
+
 ### 2025-10-05
 
 - Initial AGENTS.md setup

@@ -99,7 +99,10 @@ async fn handle_sync(url: &str) -> Result<()>
 
             if let Some(pub_date) = &item.pub_date
             {
-                println!("     {}: {}", "Published".dimmed(), pub_date.dimmed());
+                // Convert to local timezone and format nicely
+                let local_time = pub_date.with_time_zone(jiff::tz::TimeZone::system());
+                let formatted = local_time.strftime("%B %d, %Y at %I:%M %p");
+                println!("     {}: {}", "Published".dimmed(), formatted.dimmed());
             }
 
             if let Some(enclosure) = &item.enclosure
