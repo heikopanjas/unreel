@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<opml version="1.0">
+  <head>
+    <title>Overcast Podcast Subscriptions</title>
+  </head>
+  <body>
+    <outline text="feeds">
+      <outline type="rss" text="Freak Show" xmlUrl="https://feeds.metaebene.me/freakshow/mp3" applePodcastsID="277518737" />
+      <outline type="rss" text="Logbuch:Netzpolitik" xmlUrl="https://feeds.metaebene.me/lnp/mp3" applePodcastsID="476856034" />
+      <outline type="rss" text="Pivot" xmlUrl="https://feeds.megaphone.fm/pivot" applePodcastsID="1073226719" />
+      <outline type="rss" text="UKW" xmlUrl="http://ukw.fm/feed/mp3/" />
+      <outline type="rss" text="Hyperbandrauschen" xmlUrl="https://hybr.de/feed/mp3/" />
+      <outline type="rss" text="Decoder with Nilay Patel" xmlUrl="https://feeds.megaphone.fm/recodedecode" applePodcastsID="1011668648" />
+      <outline type="rss" text="Denkangebot Podcast" xmlUrl="https://www.denkangebot.org/feed/mp3/" applePodcastsID="1450105830" />
+      <outline type="rss" text="Recht politisch" xmlUrl="https://podcast71d063.podigee.io/feed/mp3" applePodcastsID="1474797855" />
+      <outline type="rss" text="Alias Podcast" xmlUrl="https://fernsehpodcast.podigee.io/feed/mp3" applePodcastsID="1524016720" />
+      <outline type="rss" text="Podlovers" xmlUrl="https://feeds.podlovers.org/mp3" applePodcastsID="1523714548" />
+      <outline type="rss" text="Realitätsabgleich" xmlUrl="https://realitaetsabgleich.podigee.io/feed/mp3" applePodcastsID="545437800" />
+      <outline type="rss" text="Holger ruft an" xmlUrl="https://podcastc5270b.podigee.io/feed/mp3" applePodcastsID="1090523158" />
+      <outline type="rss" text="Die Wochendämmerung - Der stabile Wochenrückblick" xmlUrl="https://wochendaemmerung.podigee.io/feed/mp3" applePodcastsID="1287979850" />
+      <outline type="rss" text="Auch interessant!" xmlUrl="https://auch-interessant.de/feed/mp3/" applePodcastsID="1540576759" />
+      <outline type="rss" text="Parlamentsrevue" xmlUrl="https://parlamentsrevue.de/feed/mp3/" applePodcastsID="1596603605" />
+      <outline type="rss" text="Haken dran – das Social-Media-Update der c&apos;t" xmlUrl="https://hakendran.podigee.io/feed/mp3" applePodcastsID="1654663744" />
+      <outline type="rss" text="Neben Der Spur" xmlUrl="https://nebenderspur.podigee.io/feed/mp3" applePodcastsID="1676933388" />
+      <outline type="rss" text="Glitterbrains" xmlUrl="https://glitterbrains.org/feed/mp3/" applePodcastsID="1687250293" />
+      <outline type="rss" text="The Bulwark Podcast" xmlUrl="https://audioboom.com/channels/5114286.rss" applePodcastsID="1447684472" />
+      <outline type="rss" text="The WAN Show" xmlUrl="https://feeds.megaphone.fm/LMG3928170156" applePodcastsID="1062997995" />
+      <outline type="rss" text="ThinkPad-Museum Podcast" xmlUrl="https://podcasts.darmstadt.social/@thinkpadmuseum/feed.xml" applePodcastsID="1722845536" />
+      <outline type="rss" text="Die Neuen Zwanziger - Der Salon" xmlUrl="https://steadyhq.com/rss/5d0d9fc1-7a98-40b8-a162-c461513b9291?auth=5e48e119-5707-401f-b69a-fa3fad45cdea" />
+      <outline type="rss" text="Speakeasy-Bar und WfA-Literatur" xmlUrl="https://steadyhq.com/rss/e7d121d8-e31d-4579-999f-54c8cd91193f?auth=e23b8deb-b23f-4b24-905e-2546322deffc" />
+      <outline type="rss" text="Schweigen ist Zustimmung!" xmlUrl="https://schweigenistzustimmung.de/feed/mp3/" applePodcastsID="1756064793" />
+      <outline type="rss" text="They Talk Tech – mit Eckert und Wolfangel" xmlUrl="https://frauen-technik.podigee.io/feed/mp3" applePodcastsID="1762825923" />
+      <outline type="rss" text="The 404 Media Podcast (Premium Feed)" xmlUrl="https://subscribers.transistor.fm/090415a44637fe" />
+      <outline type="rss" text="Wohlstand für Alle" xmlUrl="https://anchor.fm/s/108bcffe4/podcast/rss" applePodcastsID="1476402723" />
+      <outline type="rss" text="Gilda con Arne – Der Politik-Podcast" xmlUrl="https://anchor.fm/s/10c9476b0/podcast/rss" applePodcastsID="1839234585" />
+      <outline type="rss" text="Corporate Therapy" xmlUrl="https://rss.buzzsprout.com/883399.rss" applePodcastsID="1499611321" />
+      <outline type="rss" text="Alman Arabica" xmlUrl="https://almanarabica.podigee.io/feed/mp3" applePodcastsID="1861505984" />
+    </outline>
+  </body>
+</opml>

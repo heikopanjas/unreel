@@ -1,5 +1,7 @@
 //! RSS/XML feed parsing functionality
 
+use std::path::Path;
+
 use anyhow::{Context, bail};
 use jiff::{Zoned, fmt::rfc2822};
 use quick_xml::{Reader, events::Event};
@@ -141,6 +143,36 @@ pub fn parse_feed(xml_content: &str) -> Result<PodcastFeed>
                     }
                 }
             }
+            | Ok(Event::CData(e)) =>
+            {
+                let text = reader.decoder().decode(&e).context("Failed to decode CDATA")?.to_string();
+
+                if current_item.is_some() == true
+                {
+                    if let Some(ref mut item) = current_item
+                    {
+                        match current_tag.as_str()
+                        {
+                            | "title" => item.title = Some(text),
+                            | "description" => item.description = Some(text),
+                            | "guid" => item.guid = Some(text),
+                            | _ =>
+                            {}
+                        }
+                    }
+                }
+                else
+                {
+                    match current_tag.as_str()
+                    {
+                        | "title" => feed.title = Some(text),
+                        | "description" => feed.description = Some(text),
+                        | "link" => feed.link = Some(text),
+                        | _ =>
+                        {}
+                    }
+                }
+            }
             | Ok(Event::End(ref e)) =>
             {
                 let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
@@ -161,4 +193,91 @@ pub fn parse_feed(xml_content: &str) -> Result<PodcastFeed>
     }
 
     Ok(feed)
+}
+
+/// Represents a podcast entry from an OPML file
+#[derive(Debug, Clone)]
+pub struct OpmlEntry
+{
+    pub name:     String,
+    pub feed_url: String
+}
+
+/// Parses an OPML file to extract podcast subscriptions
+///
+/// Extracts podcast names and feed URLs from outline elements with xmlUrl attributes.
+/// Handles both flat and nested outline structures.
+///
+/// # Arguments
+///
+/// * `path` - Path to the OPML file
+///
+/// # Returns
+///
+/// Returns a vector of `OpmlEntry` structures containing podcast names and feed URLs
+///
+/// # Errors
+///
+/// Returns an error if the file cannot be read or the XML is malformed
+pub fn parse_opml(path: &Path) -> Result<Vec<OpmlEntry>>
+{
+    let content = std::fs::read_to_string(path).context(format!("Failed to read OPML file: {}", path.display()))?;
+
+    let mut reader = Reader::from_str(&content);
+    reader.config_mut().trim_text(true);
+
+    let mut entries = Vec::new();
+    let mut buf = Vec::new();
+
+    loop
+    {
+        match reader.read_event_into(&mut buf)
+        {
+            | Ok(Event::Empty(ref e)) | Ok(Event::Start(ref e)) =>
+            {
+                let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
+
+                if tag_name == "outline"
+                {
+                    let mut name = None;
+                    let mut feed_url = None;
+
+                    for attr in e.attributes().filter_map(|a| a.ok())
+                    {
+                        let key = String::from_utf8_lossy(attr.key.as_ref()).to_string();
+                        let value = String::from_utf8_lossy(&attr.value).to_string();
+
+                        match key.as_str()
+                        {
+                            | "text" | "title" =>
+                            {
+                                if name.is_none() == true
+                                {
+                                    name = Some(value);
+                                }
+                            }
+                            | "xmlUrl" => feed_url = Some(value),
+                            | _ =>
+                            {}
+                        }
+                    }
+
+                    // Only add entries that have a feed URL
+                    if let Some(url) = feed_url
+                    {
+                        let podcast_name = name.unwrap_or_else(|| "Untitled Podcast".to_string());
+                        entries.push(OpmlEntry { name: podcast_name, feed_url: url });
+                    }
+                }
+            }
+            | Ok(Event::Eof) => break,
+            | Err(e) => bail!("Error parsing OPML at position {}: {}", reader.buffer_position(), e),
+            | _ =>
+            {}
+        }
+
+        buf.clear();
+    }
+
+    Ok(entries)
 }

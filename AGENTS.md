@@ -1,6 +1,6 @@
 # Project Instructions for AI Coding Agents
 
-**Last updated:** 2025-12-29
+**Last updated:** 2026-01-16 (updated)
 
 <!-- {mission} -->
 
@@ -695,6 +695,143 @@ fix: update `KString` with "nested 'quotes'" & $special chars!
 ---
 
 ## Recent Updates & Decisions
+
+### 2026-01-16 (updated)
+
+- Added --short and --long flags to list command:
+  - `--short` displays condensed output with ID and name only (tab-separated)
+  - `--long` displays all episodes with title and publication date for each podcast
+  - Added `get_episodes` method to Database for fetching episodes sorted by pub_date DESC
+  - Removed `#[allow(dead_code)]` from Episode struct (now used)
+  - Updated version from 0.8.0 to 0.8.2 (PATCH: enhancement)
+- Reasoning: Provides flexible output options for different use cases - quick overview, scripting, and detailed episode listing.
+
+- Generated GUIDs for episodes without GUIDs and GUID replacement:
+  - Added `generate_guid` function using `DefaultHasher` on title+pub_date
+  - Generated GUIDs have format "generated:{16-char-hex}"
+  - Episodes without GUIDs now get a deterministic generated GUID for deduplication
+  - When a feed later provides a real GUID for an episode with a generated one, the GUID is updated
+  - Deduplication now works for all episodes regardless of whether they have a GUID
+  - Updated version from 0.7.2 to 0.8.0 (MINOR: new feature)
+- Reasoning: Proper deduplication requires GUIDs. Generating them from title+pub_date allows dedup while preserving the ability to adopt real GUIDs when feeds provide them later.
+
+- Episodes with empty GUIDs now inserted without warnings:
+  - Removed warning generation for episodes without GUIDs in `add_episode`
+  - Episodes with null/empty GUIDs are inserted normally (no deduplication for such episodes)
+  - Updated doc comment to reflect this behavior
+  - Updated version from 0.7.1 to 0.7.2 (PATCH: behavior change)
+- Reasoning: Empty GUIDs are valid in some podcast feeds. Inserting them without warnings reduces noise.
+
+- Added --debug flag to suppress warnings unless explicitly requested:
+  - Added `--debug` flag to `update` and `import` commands
+  - Changed `add_episode` to return `AddEpisodeResult` struct with inserted count and optional warning
+  - Warnings (e.g., episodes without GUIDs) are collected but only displayed when `--debug` is specified
+  - Removed direct eprintln from library code (database.rs)
+  - Updated `UpdateResult` and `ImportResult` to include warnings vector
+  - Updated version from 0.7.0 to 0.7.1 (PATCH: behavior change)
+- Reasoning: Warnings about episodes without GUIDs clutter normal output. Users who want to see them can use --debug.
+
+- Added export command to create OPML file from subscriptions:
+  - New `export` CLI command accepting output file path
+  - Generates OPML 2.0 format with podcast name and feed URL
+  - Escapes XML special characters in names and URLs
+  - Complements the `import` command for backup/migration
+  - Updated version from 0.6.0 to 0.7.0 (MINOR: new feature)
+- Reasoning: Allows users to backup subscriptions or migrate to other podcast apps.
+
+- Improved update command output to show only new episodes:
+  - Changed `UpdateResult` to track `Vec<NewEpisode>` instead of just count
+  - Added `NewEpisode` struct with title and pub_date
+  - Output now only shows podcasts that have new episodes
+  - Each new episode is listed with title and publication date
+  - Summary shows total podcasts updated and new episodes found
+  - Errors displayed in separate section
+  - Updated version from 0.5.3 to 0.6.0 (MINOR: changed output behavior)
+- Reasoning: Users care about new content, not confirmation that nothing changed. Showing episode details helps users see what's new at a glance.
+
+- Increased parallel download limit from 4 to 128:
+  - Updated `MAX_CONCURRENT_UPDATES` constant
+  - Affects both `update` and `import` commands
+  - Updated version from 0.5.2 to 0.5.3 (PATCH: configuration change)
+- Reasoning: Modern systems can handle many concurrent HTTP connections; the previous limit was unnecessarily conservative.
+
+- Sorted list output by newest episode publication date:
+  - Modified `get_all_podcasts` query to JOIN with episodes subquery
+  - Podcasts with most recent episodes appear first
+  - Podcasts with no episodes/dates sorted alphabetically at the end (NULLS LAST)
+  - Updated version from 0.5.1 to 0.5.2 (PATCH: enhancement)
+- Reasoning: Most relevant podcasts (recently updated) should appear at the top of the list.
+
+- Enhanced list command to show newest episode publication date:
+  - Added `get_newest_episode_date` method to database.rs (uses MAX(pub_date) query)
+  - List output now displays "Newest Episode" date for each podcast
+  - Date formatted as "Month DD, YYYY" in local timezone
+  - Updated version from 0.5.0 to 0.5.1 (PATCH: enhancement)
+- Reasoning: Helps users see at a glance how recent each podcast's content is.
+
+- Added --all and --force options to unsubscribe command:
+  - `--all` flag removes all podcasts and episodes from the database
+  - `--force` flag skips the confirmation prompt (use with --all)
+  - Added `delete_all_podcasts` method to database.rs returning count of deleted rows
+  - Made `id_or_url` argument optional (not required when using --all)
+  - Interactive confirmation shows podcast and episode counts before deletion
+  - Updated version from 0.4.0 to 0.5.0 (MINOR: new feature)
+- Reasoning: Provides a quick way to reset the database or start fresh without manually unsubscribing from each podcast. Confirmation prompt prevents accidental data loss.
+
+- Added OPML import command for bulk podcast subscription:
+  - Added `import` CLI command accepting a file path argument
+  - Created `OpmlEntry` struct and `parse_opml` function in parser.rs
+  - Parses OPML outline elements with `xmlUrl` attributes (flat and nested structures)
+  - Skips podcasts already in the database (deduplication by feed URL)
+  - Downloads and validates each feed before adding to database
+  - Runs feed downloads in parallel using `buffer_unordered` (same as update command)
+  - Displays progress with success/failure counts
+  - Updated version from 0.3.1 to 0.4.0 (MINOR: new feature)
+- Reasoning: OPML is the standard format for podcast subscription export/import, enabling easy migration from other podcast apps. Parallel downloads significantly speed up importing large OPML files.
+
+- Parallelized update command for faster subscription refreshes:
+  - Added `futures` v0.3 dependency for async stream utilities
+  - Made `Database` struct cloneable (underlying `SqlitePool` is `Arc`-based)
+  - Refactored `handle_update` to use `buffer_unordered` with controlled concurrency
+  - Default concurrent updates: 4 (configurable via `MAX_CONCURRENT_UPDATES` constant)
+  - Results displayed after all updates complete to avoid interleaved output
+  - Updated version from 0.3.0 to 0.3.1 (PATCH: performance improvement)
+- Reasoning: Sequential updates were slow with many subscriptions. Using `futures` with `buffer_unordered` provides controlled parallelism for I/O-bound operations while reusing the existing tokio runtime. Chose `futures` over `rayon` because downloads and database operations are I/O-bound, not CPU-bound.
+
+### 2026-01-16
+
+- Implemented podcast subscription database feature:
+  - Added `dirs` v5.0.1 dependency for user data directory access
+  - Updated `sqlx` to use `runtime-tokio-rustls` feature for proper async database support
+  - Created src/database.rs module with SQLite database management
+  - Database stored in `~/.local/share/unreel/subscriptions.db` (user data directory)
+  - Two tables: `podcasts` (id, name, feed_url, last_download) and `episodes` (id, podcast_id, title, guid, pub_date, downloaded)
+  - Uses RSS GUID as episode UUID for deduplication
+  - Fixed XML parser to handle CDATA sections (Event::CData) for GUIDs wrapped in CDATA tags
+  - Episode deduplication uses GUID-based lookup only (all valid podcast feeds must have GUIDs)
+  - Foreign key constraint with CASCADE delete ensures data integrity
+  - Added three new CLI commands:
+    - `subscribe <URL>` - Subscribe to a podcast feed and store all episodes
+    - `list` - Display all podcast subscriptions with episode counts and last update times
+    - `update [name]` - Refresh subscriptions (all or filtered by name, shows new vs total episodes)
+  - `sync` command remains standalone for one-time operations
+  - Database automatically creates schema on first use
+  - Updated version from 0.2.0 to 0.3.0 (MINOR: new feature)
+- Reasoning: Provides podcast subscription management for tracking multiple feeds. Using SQLite ensures efficient storage and querying. Storing in user data directory follows platform conventions. Separate commands (subscribe/list/update vs sync) keeps one-off operations distinct from persistent subscriptions. CDATA support is essential as podcast GUIDs are typically wrapped in CDATA sections in RSS feeds.
+
+### 2025-12-30
+
+- Implemented episode selection feature with unified `--episodes` flag:
+  - Created src/selector.rs module with EpisodeSelector enum and parsing logic
+  - Supports multiple selection formats: numeric ranges (1,7,23-38), newest:N, oldest:N, all, and mixed selections
+  - Keywords "newest" and "oldest" without numbers default to 1
+  - Episode numbering is chronological where 1 = oldest (first published) episode
+  - Parser intelligently merges all-numeric selections into single Numeric variant for efficiency
+  - Made --episodes flag required on sync command (breaking change)
+  - Enhanced episode display with description, file size, and publication date
+  - Comprehensive test suite with 24 unit tests covering all selection scenarios
+  - Updated version from 0.1.0 to 0.2.0 (MINOR: new feature)
+- Reasoning: Provides flexible episode selection matching user requirements for downloading specific episodes, ranges, newest/oldest episodes, and combinations. Chronological numbering (1=oldest) makes sense for "start from beginning" use cases while newest:N handles "catch up on recent" scenarios.
 
 ### 2025-12-29
 
