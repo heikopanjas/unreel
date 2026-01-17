@@ -1,6 +1,6 @@
 # Project Instructions for AI Coding Agents
 
-**Last updated:** 2026-01-16 (updated)
+**Last updated:** 2026-01-17
 
 <!-- {mission} -->
 
@@ -10,10 +10,21 @@ Unreel is a command line tool that creates local copies of your podcast feed.
 
 ## Technology Stack
 
+### Rust CLI (in `rust/` directory)
+
 - **Language:** Rust (Edition 2024)
 - **Framework:** None (CLI application)
-- **Version Control:** Git
 - **Package Manager:** Cargo
+
+### Swift (planned, for macOS/iOS apps)
+
+- **Language:** Swift
+- **Platforms:** macOS, iOS
+- **Package Manager:** Swift Package Manager
+
+### Shared
+
+- **Version Control:** Git
 - **License:** MIT
 
 <!-- {principles} -->
@@ -396,14 +407,20 @@ When initializing a session or analyzing the workspace, refer to instruction fil
 - Implementation: Feature modules in `src/`
 - Keep `main.rs` focused on CLI handling and error reporting
 - Put business logic in library modules for reusability
-- Example structure:
+- Current Rust structure:
 
   ```text
-  src/
-  ├── main.rs              # CLI entry point
-  ├── lib.rs               # Public API
-  ├── template_manager.rs  # Core functionality
-  └── utils.rs             # Shared utilities
+  rust/
+  ├── Cargo.toml           # Package manifest
+  ├── Cargo.lock           # Dependency lock file
+  ├── .rustfmt.toml        # Formatting configuration
+  └── src/
+      ├── main.rs          # CLI entry point
+      ├── lib.rs           # Public API
+      ├── database.rs      # SQLite database management
+      ├── downloader.rs    # HTTP download functionality
+      ├── parser.rs        # RSS/XML and OPML parsing
+      └── selector.rs      # Episode selection logic
   ```
 
 **Best Practices:**
@@ -695,6 +712,16 @@ fix: update `KString` with "nested 'quotes'" & $special chars!
 ---
 
 ## Recent Updates & Decisions
+
+### 2026-01-17
+
+- Restructured project for multi-platform support (Rust + Swift):
+  - Moved all Rust files into `rust/` subdirectory
+  - Rust CLI tool preserved for continued development
+  - Root directory now shared between Rust and future Swift implementations
+  - Updated `.gitignore` with Swift/Xcode patterns and explicit Rust paths
+  - Shared files remain at root: `AGENTS.md`, `LICENSE`, `README.md`, `data/`
+- Reasoning: Preparing to port unreel to Swift for macOS and iOS apps. Separating Rust code allows both implementations to coexist in the same repository.
 
 ### 2026-01-16 (updated)
 
