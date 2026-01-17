@@ -1,14 +1,16 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
-// 
-// Swift Argument Parser
-// https://swiftpackageindex.com/apple/swift-argument-parser/documentation
-
 import ArgumentParser
+import unreel_engine
 
 @main
-struct unreel: ParsableCommand {
+struct Unreel: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "unreel",
+        abstract: "A command line tool for managing podcast feeds",
+        version: unreelEngineVersion
+    )
+
     mutating func run() throws {
-        print("Hello, world!")
+        print("unreel v\(unreelEngineVersion)")
+        print("Use --help to see available commands")
     }
 }

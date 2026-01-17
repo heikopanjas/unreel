@@ -1,21 +1,47 @@
 // swift-tools-version: 6.2
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "unreel",
+    platforms: [
+        .macOS(.v14),
+        .iOS(.v17)
+    ],
+    products: [
+        .library(
+            name: "unreel-engine",
+            targets: ["unreel-engine"]
+        ),
+        .executable(
+            name: "unreel",
+            targets: ["unreel"]
+        )
+    ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
+        .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.0.0")
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
+        // Core library with podcast feed parsing, database, and download functionality
+        .target(
+            name: "unreel-engine",
+            dependencies: [
+                .product(name: "GRDB", package: "GRDB.swift")
+            ]
+        ),
+        // CLI executable
         .executableTarget(
             name: "unreel",
             dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                "unreel-engine",
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         ),
+        // Tests for unreel-engine
+        .testTarget(
+            name: "unreel-engineTests",
+            dependencies: ["unreel-engine"]
+        )
     ]
 )
